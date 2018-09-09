@@ -1,4 +1,4 @@
-import javax.print.DocFlavor
+package vendingmachine
 
 /**
  * You MUST implement this interface.
@@ -44,19 +44,18 @@ interface VendingMachineHardwareFunctions {
 }
 
 interface VendingMachineAdminFunctions {
-    fun addProduct(product: Product?) {
-        TODO()
+    fun addProduct(product: VendingProduct?, count: Int?) {
+        product?.count = product?.count!! + count!!
     }
 }
 
 class VendingMachineHardwareFunctionsImpl : VendingMachineHardwareFunctions
 class VendingMachineAdminFunctionsImpl: VendingMachineAdminFunctions
 
-data class Product(val name: String, val price: Int, var count: Int)
+data class VendingProduct(val name: String, val price: Int, var count: Int)
 
-class VendingMachineImpl(var products: Map<Int, Product>) : VendingMachine {
-    var hardwareFunctions = VendingMachineHardwareFunctionsImpl()
-    var adminFunctionsImpl = VendingMachineAdminFunctionsImpl()
+class VendingMachineImpl(var products: Map<Int, VendingProduct>, private val hardwareFunctions: VendingMachineHardwareFunctionsImpl) : VendingMachine {
+    var adminFunctions = VendingMachineAdminFunctionsImpl()
 
     var userMoney: Int = 0
 
@@ -65,7 +64,7 @@ class VendingMachineImpl(var products: Map<Int, Product>) : VendingMachine {
         val name = products[productPosition]?.name
         val count = products[productPosition]?.count
 
-        hardwareFunctions.showMessage("Name is $name, amount is $price")
+        hardwareFunctions.showMessage("Name is $name, price is $price")
 
         if (userMoney < price!!) {
             println("Not enough money")
@@ -88,9 +87,12 @@ class VendingMachineImpl(var products: Map<Int, Product>) : VendingMachine {
 }
 
 fun main(args: Array<String>) {
-    val obj = VendingMachineImpl(hashMapOf(0 to Product("foo", 10, 5), 1 to Product("bar", 45, 1)))
+    val hardwareFunctions = VendingMachineHardwareFunctionsImpl()
+    var startProducts = hashMapOf(0 to VendingProduct("foo", 10, 5), 1 to VendingProduct("bar", 45, 1))
+    val obj = VendingMachineImpl(startProducts, hardwareFunctions)
 
     println("Calling addUserMoney(25): ${obj.addUserMoney(25)}")
+    println("Calling buttonPress(1): ${obj.buttonPress(1)}")
     println("Calling addUserMoney(25): ${obj.addUserMoney(25)}")
     println("Calling buttonPress(1): ${obj.buttonPress(1)}")
     println("Calling addUserMoney(25): ${obj.addUserMoney(25)}")
