@@ -52,7 +52,7 @@ interface VendingMachineAdminFunctions {
 class VendingMachineHardwareFunctionsImpl : VendingMachineHardwareFunctions
 class VendingMachineAdminFunctionsImpl: VendingMachineAdminFunctions
 
-data class Product(val name: String, var price: Int)
+data class Product(val name: String, val price: Int, var count: Int)
 
 class VendingMachineImpl(var products: Map<Int, Product>) : VendingMachine {
     var hardwareFunctions = VendingMachineHardwareFunctionsImpl()
@@ -63,13 +63,23 @@ class VendingMachineImpl(var products: Map<Int, Product>) : VendingMachine {
     override fun buttonPress(productPosition: Int?) {
         val price = products[productPosition]?.price
         val name = products[productPosition]?.name
+        val count = products[productPosition]?.count
+
         hardwareFunctions.showMessage("Name is $name, amount is $price")
 
-        if (userMoney >= price!!) {
-            hardwareFunctions.dispenseProduct(productPosition, name)
-            hardwareFunctions.dispenseChange(userMoney - price)
-            userMoney = 0
+        if (userMoney < price!!) {
+            println("Not enough money")
+            return
         }
+        if (count!! < 1) {
+            println("Out of stock")
+            return
+        }
+
+        hardwareFunctions.dispenseProduct(productPosition, name)
+        hardwareFunctions.dispenseChange(userMoney - price)
+        products[productPosition]?.count = products[productPosition]?.count!! - 1
+        userMoney = 0
     }
 
     override fun addUserMoney(cents: Int?) {
@@ -78,10 +88,12 @@ class VendingMachineImpl(var products: Map<Int, Product>) : VendingMachine {
 }
 
 fun main(args: Array<String>) {
-    val obj = VendingMachineImpl(hashMapOf(0 to Product("foo", 10), 1 to Product("bar", 45)))
+    val obj = VendingMachineImpl(hashMapOf(0 to Product("foo", 10, 5), 1 to Product("bar", 45, 1)))
 
     println("Calling addUserMoney(25): ${obj.addUserMoney(25)}")
     println("Calling addUserMoney(25): ${obj.addUserMoney(25)}")
     println("Calling buttonPress(1): ${obj.buttonPress(1)}")
-    println("Calling buttonPress(0): ${obj.buttonPress(0)}")
+    println("Calling addUserMoney(25): ${obj.addUserMoney(25)}")
+    println("Calling addUserMoney(25): ${obj.addUserMoney(25)}")
+    println("Calling buttonPress(0): ${obj.buttonPress(1)}")
 }
