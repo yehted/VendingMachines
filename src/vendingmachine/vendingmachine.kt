@@ -54,9 +54,7 @@ class VendingMachineAdminFunctionsImpl: VendingMachineAdminFunctions
 
 data class VendingProduct(val name: String, val price: Int, var count: Int)
 
-class VendingMachineImpl(var products: Map<Int, VendingProduct>, private val hardwareFunctions: VendingMachineHardwareFunctionsImpl) : VendingMachine {
-    var adminFunctions = VendingMachineAdminFunctionsImpl()
-
+class VendingMachineImpl(var products: Map<Int, VendingProduct>, private val hardwareFunctions: VendingMachineHardwareFunctionsImpl, private val adminFunctions: VendingMachineAdminFunctionsImpl) : VendingMachine {
     var userMoney: Int = 0
 
     override fun buttonPress(productPosition: Int?) {
@@ -84,12 +82,17 @@ class VendingMachineImpl(var products: Map<Int, VendingProduct>, private val har
     override fun addUserMoney(cents: Int?) {
         userMoney += cents!!
     }
+
+    fun addProduct(productPosition: Int?, count: Int?) {
+        adminFunctions.addProduct(products[productPosition], count)
+    }
 }
 
 fun main(args: Array<String>) {
     val hardwareFunctions = VendingMachineHardwareFunctionsImpl()
+    val adminFunctions = VendingMachineAdminFunctionsImpl()
     var startProducts = hashMapOf(0 to VendingProduct("foo", 10, 5), 1 to VendingProduct("bar", 45, 1))
-    val obj = VendingMachineImpl(startProducts, hardwareFunctions)
+    val obj = VendingMachineImpl(startProducts, hardwareFunctions, adminFunctions)
 
     println("Calling addUserMoney(25): ${obj.addUserMoney(25)}")
     println("Calling buttonPress(1): ${obj.buttonPress(1)}")
@@ -97,5 +100,7 @@ fun main(args: Array<String>) {
     println("Calling buttonPress(1): ${obj.buttonPress(1)}")
     println("Calling addUserMoney(25): ${obj.addUserMoney(25)}")
     println("Calling addUserMoney(25): ${obj.addUserMoney(25)}")
+    println("Calling buttonPress(0): ${obj.buttonPress(1)}")
+    println("Calling addProduct(0): ${obj.addProduct(1, 2 )}")
     println("Calling buttonPress(0): ${obj.buttonPress(1)}")
 }
